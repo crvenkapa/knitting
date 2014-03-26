@@ -5,6 +5,7 @@ import pdb
 import csv
 import os
 import re
+import datetime
 
 from config import user_name, passwrd
 
@@ -62,6 +63,20 @@ def get_projects_queues(soup):
 	n_queues = m[0] if m else '0';
 	return (n_projects, n_queues)
 
+def get_project_age(soup):
+	""" return the age in days"""
+	t = soup.find('ul', {'class':'page_date_sidebar'}).find('li').text
+	p = t.replace('\nPage created: ', '').rstrip()
+	delta = datetime.date.today()-datetime.datetime.strptime(p, "%B %d, %Y").date()
+	return delta.days
+	
+def get_price(soup):
+	try:
+		t = soup.find('strong', {'class':'price'}).text
+	except AttributeError: 
+		return 1
+	return 1 if 'free' in t else 0
+	
 def get_ratings(soup, s):
 	premagic = soup.find('div', {'class':'pattern_summary'}).find('div', {'class':'average'})
 	if premagic == None:
@@ -95,20 +110,25 @@ def scraping(s):
 			with open(os.path.join('data',os.path.splitext(f)[0]+'_stats.csv'), 'w') as fh2:
 				csvreader = csv.DictReader(fh)
 				csvwriter = csv.writer(fh2)
-				csvwriter.writerow(['name', 'url', 'number of projects', 'number of queues', 
-					'star rating from one to five', 'difficulty rating from one to ten'])
+				csvwriter.writerow(['name', 'url', 'nprojects', 'nqueues', 
+					'star_rating', 'diff_rating', 'project_age', 'isfree'])
 				for d in csvreader:
 					project = s.get(d['url'])
+					htmlfile = d['url'].replace('http://www.ravelry.com/patterns/library/','')
+					with open(os.path.join('html', htmlfile + ".html"), "w") as fh3:
+						fh3.write(project.text.encode('utf-8'))
 					soup_project = bs4.BeautifulSoup(project.text)
 					c = get_projects_queues(soup_project)
 					e = get_ratings(soup_project, s)
+					price = get_price(soup_project)
+					date = get_project_age(soup_project)
 					csvwriter.writerow([d['name'], d['url'], c[0], c[1],
-						';'.join(map(str, e[0])), ';'.join(map(str, e[1]))])
+						';'.join(map(str, e[0])), ';'.join(map(str, e[1])), date, price])
 							
 
 if __name__ == "__main__":
 	s = login_ravelry(user_name, passwrd)
-	get_patterns_list(s)	
+	#get_patterns_list(s)	
 	scraping(s)				
 				
 	
