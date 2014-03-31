@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import requests
 import bs4
-import pdb
 import csv
 import os
 import re
@@ -38,15 +37,12 @@ def get_patterns_list(s):
 		categories.extend([(link.find('a').get('href'), link.find('a').text) 
 			for link in cat('li')])
 		
-		
-		
 	for ad, cat_name in categories:
 		with open('data/' + ad.replace('/patterns/knitting/popular/', '') + '.csv', 'w') as fh:
 			csvwriter = csv.writer(fh)
 			csvwriter.writerow(['name', 'url'])
 			for p in range(1,6):
 				url = "http://www.ravelry.com{0}?page={1}".format(ad, p)
-				#pdb.set_trace()
 				cat_page = s.get(url)
 				if cat_page.status_code == 200:
 					soup_cat = bs4.BeautifulSoup(cat_page.text)
@@ -100,8 +96,6 @@ def get_ratings(soup, s):
 		else:
 			difficulty.append(int(L[i]))
 	return (stars, difficulty)
-	
-
 
 def scraping(s):
 	files = os.listdir('data')
@@ -128,9 +122,5 @@ def scraping(s):
 
 if __name__ == "__main__":
 	s = login_ravelry(user_name, passwrd)
-	#get_patterns_list(s)	
+	get_patterns_list(s)	
 	scraping(s)				
-				
-	
-	
-	
