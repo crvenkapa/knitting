@@ -11,4 +11,5 @@ a config.py file as user_name and passwrd
 difficulty ratings and add them to the data files
 
 The actual data analysis is done in the ipython notebook. To open it you 
-need to run `ipython notebook` in the project directory. 
+need to run `ipython notebook` in the project directory. Or, for easy 
+viewing of the notebook, you can go to [here](http://nbviewer.ipython.org/). 
